@@ -1,0 +1,66 @@
+name: prsieve
+description: >-
+  Triage a pull request before review: conflicts with other open pull requests,
+  formatting churn, and descriptions that do not match the diff.
+author: Kirtan Bhatt
+branding:
+  icon: filter
+  color: purple
+
+inputs:
+  fail-on:
+    description: Fail the step if a finding is at or above this severity (info, low, medium, high, none).
+    default: high
+  min-severity:
+    description: Hide findings below this severity.
+    default: info
+  ignore:
+    description: Rule ids to skip, space or comma separated.
+    default: ""
+  max-others:
+    description: Compare with at most this many other open pull requests.
+    default: "30"
+  annotations:
+    description: Annotate findings on the pull request ("true" or "false").
+    default: "true"
+  job-summary:
+    description: Write a Markdown table to the job summary ("true" or "false").
+    default: "true"
+  token:
+    description: Token used to list open pull requests. Read access is enough.
+    default: ${{ github.token }}
+
+outputs:
+  findings:
+    description: Number of findings reported.
+    value: ${{ steps.run.outputs.findings }}
+
+runs:
+  using: composite
+  steps:
+    - id: run
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
+        PRSIEVE_FAIL_ON: ${{ inputs.fail-on }}
+        PRSIEVE_MIN_SEVERITY: ${{ inputs.min-severity }}
+        PRSIEVE_IGNORE: ${{ inputs.ignore }}
+        PRSIEVE_MAX_OTHERS: ${{ inputs.max-others }}
+        PRSIEVE_ANNOTATIONS: ${{ inputs.annotations }}
+        PRSIEVE_JOB_SUMMARY: ${{ inputs.job-summary }}
+      run: |
+        set -uo pipefail
+        report="${RUNNER_TEMP:-/tmp}/prsieve.json"
+        args=(github --fail-on "$PRSIEVE_FAIL_ON" --min-severity "$PRSIEVE_MIN_SEVERITY"
+              --max-others "$PRSIEVE_MAX_OTHERS" --json "$report")
+        if [ "$PRSIEVE_ANNOTATIONS" = "true" ]; then args+=(--format github); else args+=(--format text); fi
+        if [ "$PRSIEVE_JOB_SUMMARY" = "true" ]; then args+=(--summary "$GITHUB_STEP_SUMMARY"); fi
+        for rule in ${PRSIEVE_IGNORE//,/ }; do args+=(--ignore "$rule"); done
+        PYTHONPATH="$GITHUB_ACTION_PATH" python3 -m prsieve "${args[@]}"
+        code=$?
+        count=0
+        if [ -f "$report" ]; then
+          count=$(python3 -c 'import json,sys; print(len(json.load(open(sys.argv[1]))["findings"]))' "$report")
+        fi
+        echo "findings=$count" >> "$GITHUB_OUTPUT"
+        exit "$code"

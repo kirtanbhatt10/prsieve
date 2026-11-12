@@ -1,0 +1,16 @@
+name: prsieve
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Triage this pull request with the code on this branch
+        uses: ./

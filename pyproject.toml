@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "prsieve"
+dynamic = ["version"]
+description = "Triage pull requests before you review them: conflicts between open PRs, formatting churn and descriptions that do not match the diff."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Kirtan Bhatt" }]
+keywords = ["pull-request", "code-review", "triage", "merge-conflict", "github-actions", "maintainers"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Software Development :: Version Control :: Git",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/kirtanbhatt10/prsieve"
+Issues = "https://github.com/kirtanbhatt10/prsieve/issues"
+Changelog = "https://github.com/kirtanbhatt10/prsieve/blob/main/CHANGELOG.md"
+
+[project.scripts]
+prsieve = "prsieve.cli:main"
+
+[tool.setuptools]
+packages = ["prsieve"]
+
+[tool.setuptools.dynamic]
+version = { attr = "prsieve.__version__" }
