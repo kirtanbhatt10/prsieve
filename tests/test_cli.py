@@ -38,6 +38,7 @@ class CliTests(unittest.TestCase):
             self.assertIn("MEDIUM  PS100  README.md", out)
             self.assertIn("Conflicts with #2", out)
             self.assertIn("1 finding: 1 medium", out)
+            self.assertIn("into main: 1 file, +1 -1, compared with 1 open pull request\n", out)
             self.assertNotIn("\033", out)
 
     def test_fail_on_levels(self):

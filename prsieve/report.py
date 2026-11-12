@@ -47,12 +47,13 @@ def _tally(findings: List[Finding]) -> str:
 
 def _headline(result: Result) -> str:
     if result.mode == "queue":
-        return "%d open pull requests against %s" % (len(result.subjects), result.base)
+        return "%d open pull request%s against %s" % (
+            len(result.subjects), "" if len(result.subjects) == 1 else "s", result.base)
     cs = result.subjects[0]
     title = " %s" % cs.title if cs.title else ""
-    return "%s%s (%s) into %s: %d files, +%d -%d, compared with %d open pull request%s" % (
-        cs.name, title, cs.sha[:7], result.base, len(cs.files), cs.added, cs.removed,
-        len(result.compared), "" if len(result.compared) == 1 else "s")
+    return "%s%s (%s) into %s: %d file%s, +%d -%d, compared with %d open pull request%s" % (
+        cs.name, title, cs.sha[:7], result.base, len(cs.files), "" if len(cs.files) == 1 else "s",
+        cs.added, cs.removed, len(result.compared), "" if len(result.compared) == 1 else "s")
 
 
 def _plan_lines(result: Result) -> List[str]:
